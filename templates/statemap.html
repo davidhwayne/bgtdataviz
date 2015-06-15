@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Map</title>
+<style>
+
+.state {
+  fill: #D0DFEF;
+  stroke: #8A929A;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script>
+
+var valueById = [
+   NaN, {{stscale['AL']}}, {{stscale['AK']}}, NaN, {{stscale['AZ']}}, {{stscale['AR']}}, {{stscale['CA']}}, NaN, {{stscale['CO']}}, {{stscale['CT']}},
+   {{stscale['DE']}}, NaN, {{stscale['FL']}},{{stscale['GA']}},  NaN, {{stscale['HI']}}, {{stscale['ID']}}, {{stscale['IL']}}, {{stscale['IN']}}, {{stscale['IA']}},
+   {{stscale['KS']}}, {{stscale['KY']}}, {{stscale['LA']}}, {{stscale['ME']}}, {{stscale['MD']}}, {{stscale['MA']}}, {{stscale['MI']}}, {{stscale['MN']}}, {{stscale['MS']}}, {{stscale['MO']}},
+   {{stscale['MT']}}, {{stscale['NE']}}, {{stscale['NV']}}, {{stscale['NH']}}, {{stscale['NJ']}}, {{stscale['NM']}}, {{stscale['NY']}}, {{stscale['NC']}}, {{stscale['ND']}}, {{stscale['OH']}},
+   {{stscale['OK']}}, {{stscale['OR']}}, {{stscale['PA']}},  NaN, {{stscale['RI']}}, {{stscale['SC']}}, {{stscale['SD']}}, {{stscale['TN']}}, {{stscale['TX']}}, {{stscale['UT']}},
+   {{stscale['VT']}}, {{stscale['VA']}},  NaN, {{stscale['WA']}}, {{stscale['WV']}}, {{stscale['WI']}}, {{stscale['WY']}}
+];
+
+valueById[2]=valueById[2]*3
+
+
+var path = d3.geo.path();
+
+var width=480;
+var height=400;
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var jsonfilepath="{{ url_for('static', filename='us.json') }}"
+
+d3.json(jsonfilepath, function(error, us) {
+  var svgf=svg.selectAll(".state")
+      .data(topojson.feature(us, us.objects.states).features
+      .filter(function(d){
+      return  d.id==={{id}};})
+      )
+    .enter().append("path")
+      .attr("class", "state")
+      .attr("d", path)
+      .attr("transform", function(d) {
+        var centroid = path.centroid(d),
+            x = width / 2 - centroid[0] * Math.sqrt(valueById[d.id] || 0),
+            y = height / 2 - centroid[1] * Math.sqrt(valueById[d.id] || 0);
+        return "translate(" + x + "," + y + ")"
+            + "scale(" + Math.sqrt(valueById[d.id] || 0) + ")";
+      })
+      .style("stroke-width", function(d) {
+        var centroid = path.centroid(d)
+        console.log(centroid)
+        return 1 / Math.sqrt(valueById[d.id] || 1);
+      });
+});
+
+</script>
+</body>
+</html>

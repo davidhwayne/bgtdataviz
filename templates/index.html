@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>BGT Data Visualization Competition</title>
+    
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='starter-template.css') }}" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <!--<script src="../../assets/js/ie-emulation-modes-warning.js"></script>-->
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Scaling The United States</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#options">Scale Options</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="main">
+        <h1>The United States of {{title}}</h1>
+        <p class="lead">Using census data and Burning Glass job data each of the United States is individually scaled according to the chosen statistics. </p> 
+      </div>
+      <iframe src="/fullmap.do?scale={{scale}}&occ={{occ}}&fam={{fam}}&by={{by}}&size={{size}}" marginwidth="0" marginheight="0" scrolling="no"></iframe><br>
+      <a href="/fullmap.do?scale={{scale}}&occ={{occ}}&fam={{fam}}&by={{by}}&size={{size}}" target=blank>View on separate page</a>
+      {% if scale=='occ' or scale=='fam' %}
+      <div class="column">
+      <form>
+      <input type="hidden" name="scale" value="{{scale}}">
+      <input type="hidden" name="occ" value="{{occ}}">
+      <input type="hidden" name="fam" value="{{fam}}">
+      <fieldset>
+        <label>Scale by:</label>
+        <input type="radio" name="by" value="area" id="byarea" {% if by=='area' %} checked {% endif %}>
+        <label for="area"><span></span>Jobs Per Area</label>
+        <input type="radio" name="by" value="pop" id="bypopulation"  {% if by=='pop' %} checked {% endif %}>
+        <label for="bypopulation"><span></span>Jobs Per Capita</label>
+      </fieldset>
+      <fieldset class="action">
+        <input type="submit" name="act" value="Update">
+      </fieldset>
+      </form>
+      </div>
+      <h2>Fun Facts:</h2>(from the lower 48)
+      <h3>Similar Sizes</h3>
+      <iframe class="smallmap" src="/statemap.do?scale={{scale}}&occ={{occ}}&fam={{fam}}&by={{by}}&id={{close1}}" marginwidth="0" marginheight="0" scrolling="no"></iframe><iframe class="smallmap" src="/statemap.do?scale={{scale}}&occ={{occ}}&fam={{fam}}&by={{by}}&id={{close2}}" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+      <div class="main">
+      <p class="lead">After rescaling, {{close1name}} and {{close2name}} are approximately the same size.</p>
+      </div>
+      <h3>Biggest Changes</h3>
+      <iframe class="smallmap" src="/statemap.do?scale={{scale}}&occ={{occ}}&fam={{fam}}&by={{by}}&id={{lowdiff}}" marginwidth="0" marginheight="0" scrolling="no"></iframe><iframe class="smallmap" src="/statemap.do?scale={{scale}}&occ={{occ}}&fam={{fam}}&by={{by}}&id={{hidiff}}" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+      <div class="main">
+      <p class="lead">Rescaling shrinks {{lowname}} the most, shrinking it to {{lowfactor}}X it's original size. {{hiname}} is expanded the most, scaling up to {{hifactor}}X times it's original size. {{hiname}} is now {{difffactor}}X the size of {{lowname}}.</p>
+      </div>
+      {% endif %}
+      <a name="options"></a>
+      <div class="main">
+      <hr>
+      </div>
+      <h2>Scaling Options</h2>
+      <div class="main">
+      <h3>Census Data</h3><br>
+      <p class="lead">Basic scales according to standard metrics and census data </p>
+      <div class="columnlist">
+      <a href="/?scale=reality">Reality</a><br> <a href="/?scale=population">Population</a>
+      </div>
+      <h3>Job Data</h3><br>
+      <p class="lead">Burning Glass Job data provides the data to scale the USA by the following jobs and their posting counts. They are organized by occupation families with the bolded links rescaling according to the whole family. </p>
+        <div class="columnlist">
+        {% for c in famoptions %}
+        <b><a href="/?scale=fam&fam={{c[0]}}&by=area">{{c[1]}}</a></b><br>
+        {% for d in occoptions %}
+        {% if d[0]==c[0] -%}
+        <a href="/?scale=occ&occ={{d[2]}}&by=area">{{d[3]}}</a><br>
+        {% endif %}
+        {% endfor %}
+        <br>  
+        {% endfor %}
+        </div>
+      <h3>Novelty Scales</h3><br>
+      <p class="lead">Just for fun</p>
+      <div class="columnlist">
+      <b>Same Size</b><br> <a href="/?scale=same&size=small">Small</a><br>
+      <a href="/?scale=same&size=medium">Medium</a><br>
+      <a href="/?scale=same&size=large">Large</a><br>
+      <a href="/?scale=same&size=huge">Huge</a><br><br>
+      <b>Inverse</b><br>
+      <a href="/?scale=inversepop">Population</a><br>
+      <a href="/?scale=inversearea">Area</a><br><br>
+      <b><a href="/?scale=random">Random</a></b> 
+      </div>
+      </div>
+      <a name="about"></a>
+      <h2>About</h2>
+      <div class="main"> 
+      <p class="lead">This page is an official entrant for the Burning Glass Data Visualization competition by David Wayne. 
+      This webpage is written using the Python Flask web framework with a MySQL backend, and a D3/Javascript front end with a basic Bootstrap page design.
+      The codebase is available at <a href='https://github.com/davidhwayne/bgtdataviz'>GitHub</a>.</p>
+      
+      David Wayne is a Data Scientist at Burning Glass Technologies, a labor market technology and analytics company headquartered in Boston's North End. 
+      Prior to his work as a Data Scientist, he obtained his PhD in Mathematics from the University of Colorado at Boulder.
+      </div>
+    </div><!-- /.container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
+  </body>
+</html>
+
+
